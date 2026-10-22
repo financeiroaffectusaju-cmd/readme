@@ -23,6 +23,10 @@ input:focus,select:focus{outline:2px solid var(--ac);outline-offset:0}
 .chk label{display:flex;align-items:center;gap:6px;color:var(--tx);font-size:15px}
 .chk input{width:18px;height:18px;accent-color:var(--ac)}
 .cap{font-size:13px;color:var(--mut)}
+.hr{display:grid;grid-template-columns:50px repeat(4,minmax(90px,1fr));gap:8px;align-items:end;margin-top:8px}
+.hr b{padding-bottom:9px}.hr label{font-size:12px}
+@media(max-width:600px){.hr{grid-template-columns:50px 1fr 1fr}}
+.mini{padding:5px 10px;font-size:13px;margin-top:8px}
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 button{font:inherit;padding:10px 18px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
 button.p{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
@@ -85,8 +89,9 @@ button.p:hover{background:var(--acx)}
     <label><input type="checkbox" value="2"> Qua</label><label><input type="checkbox" value="3"> Qui</label>
     <label><input type="checkbox" value="4"> Sex</label><label><input type="checkbox" value="5"> Sáb</label>
    </div></label>
-  <label>Horário inicial <input id="hini" type="time"></label>
-  <label>Horário final <input id="hfim" type="time"></label>
+  <div class="w2 hor" id="horarios" style="grid-column:1/-1">
+   <div class="cap" id="hcap">Marque os dias acima para informar o horário de cada um.</div>
+  </div>
   <label>Vigência: início <input id="vini" type="date"></label>
   <label>Vigência: fim <input id="vfim" type="date"></label>
   <label>Valor (R$) <input id="valor" type="text" placeholder="40,00"></label>
@@ -165,9 +170,10 @@ function dados(){
   const v=id=>$(id).value.trim();
   const tipo=+document.querySelector("input[name=tipo]:checked").value;
   const dias=[...document.querySelectorAll("#dias input:checked")].map(i=>+i.value);
+  const hor=dias.map(i=>{const g=k=>$("h"+i+k).value;return {dia:i,p:[[g("a"),g("b")],[g("c"),g("d")]]}});
   return {num:pad2(v("num")),ano:v("ano"),dcontrato:br(v("dcontrato")),demissao:br(v("demissao")),tipo,
     refn:pad2(v("refn")),refa:v("refa"),razao:v("razao"),cnpj:v("cnpj"),prof:v("prof"),conselho:v("conselho"),
-    nconselho:v("nconselho"),esp:v("esp"),sala:v("sala"),unid:v("unid"),dias,hini:v("hini"),hfim:v("hfim"),
+    nconselho:v("nconselho"),esp:v("esp"),sala:v("sala"),unid:v("unid"),dias,hor,
     vini:br(v("vini")),vfim:br(v("vfim")),valor:v("valor"),por:+$("por").value,prazo:br(v("prazo")),
     sig:v("sig"),cargo:v("cargo")};
 }
@@ -175,14 +181,28 @@ function faltando(d){
   const m=[];
   const req={num:"Nº da OS",ano:"Ano",dcontrato:"Data do contrato",demissao:"Data de emissão",razao:"Razão social",cnpj:"CNPJ",
     prof:"Nome do profissional",conselho:"Conselho",nconselho:"Nº do conselho",esp:"Especialidade",sala:"Sala",unid:"Unidade",
-    hini:"Horário inicial",hfim:"Horário final",vini:"Início da vigência",vfim:"Fim da vigência",valor:"Valor",prazo:"Prazo para resposta",
+    vini:"Início da vigência",vfim:"Fim da vigência",valor:"Valor",prazo:"Prazo para resposta",
     sig:"Assinatura Affectus",cargo:"Cargo"};
   for(const k in req)if(!d[k])m.push(req[k]);
   if(!d.dias.length)m.push("Dia(s) da semana");
+  for(const h of d.hor){
+    const n=DIAS[h.dia];
+    if(!h.p[0][0]||!h.p[0][1])m.push("Horário de "+n);
+    for(const [a,b] of h.p){if((a&&!b)||(!a&&b))m.push("Horário incompleto em "+n);else if(a&&b&&b<=a)m.push("Horário final antes do inicial em "+n)}
+  }
   if(d.tipo>0&&(!d.refn||!d.refa))m.push("OS de referência");
   return m;
 }
 
+const DIAS=["Seg","Ter","Qua","Qui","Sex","Sáb"];
+function textoHorario(hor){
+  const faixa=h=>h.p.filter(([a,b])=>a&&b).map(([a,b])=>`${a} às ${b}`).join(" e ");
+  const grupos=[];
+  for(const h of hor){const t=faixa(h);const g=grupos.find(x=>x.t===t);if(g)g.dias.push(DIAS[h.dia]);else grupos.push({t,dias:[DIAS[h.dia]]})}
+  if(grupos.length===1)return grupos[0].t;
+  const lista=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" e "+a[a.length-1];
+  return grupos.map(g=>`${lista(g.dias)}: ${g.t}`).join("; ");
+}
 function preencher(xml,d){
   const doc=new DOMParser().parseFromString(xml,"application/xml");
   const marca=(n,occ)=>["☐","☒",occ];
@@ -192,7 +212,7 @@ function preencher(xml,d){
     "[RAZÃO SOCIAL] — CNPJ [CNPJ]":[["[RAZÃO SOCIAL]",d.razao],["[CNPJ]",d.cnpj]],
     "[NOME] — [CONSELHO] nº [Nº/UF]":[["[NOME]",d.prof],["[CONSELHO]",d.conselho],["[Nº/UF]",d.nconselho]],
     "[ESPECIALIDADE]":[["[ESPECIALIDADE]",d.esp]],
-    "[HH:MM] às [HH:MM]":[["[HH:MM]",d.hini,0],["[HH:MM]",d.hfim,1]],
+    "[HH:MM] às [HH:MM]":[["[HH:MM] às [HH:MM]",textoHorario(d.hor)]],
     "[SALA] — [UNIDADE]":[["[SALA]",d.sala],["[UNIDADE]",d.unid]],
     "de [DD/MM/AAAA] a [DD/MM/AAAA]":[["[DD/MM/AAAA]",d.vini,0],["[DD/MM/AAAA]",d.vfim,1]],
     "Prazo para resposta: até [DD/MM/AAAA].":[["[DD/MM/AAAA]",d.prazo]],
@@ -254,11 +274,30 @@ $("salvar").onclick=()=>{
   store.set("profissionais",l);listar(i);$("msg").className="ok";$("msg").textContent="Profissional salvo neste navegador.";
 };
 $("apagar").onclick=()=>{const i=$("saved").value;if(i==="")return;const l=store.get("profissionais",[]);l.splice(+i,1);store.set("profissionais",l);listar();};
+function montarHorarios(){
+  const box=$("horarios");
+  DIAS.forEach((n,i)=>{
+    const r=document.createElement("div");r.className="hr";r.id="hr"+i;r.style.display="none";
+    r.innerHTML=`<b>${n}</b>`+[["a","Início"],["b","Fim"],["c","Início (2º turno)"],["d","Fim (2º turno)"]].map(([k,t])=>`<label>${t}<input id="h${i}${k}" type="time"></label>`).join("");
+    box.appendChild(r);
+  });
+  const b=document.createElement("button");b.type="button";b.className="mini";b.id="copiar";b.style.display="none";
+  b.textContent="Copiar o horário do primeiro dia para os demais";
+  b.onclick=()=>{const m=[...document.querySelectorAll("#dias input:checked")].map(x=>+x.value);if(m.length<2)return;
+    m.slice(1).forEach(i=>["a","b","c","d"].forEach(k=>$("h"+i+k).value=$("h"+m[0]+k).value))};
+  box.appendChild(b);
+  const att=()=>{const m=[...document.querySelectorAll("#dias input:checked")].map(x=>+x.value);
+    DIAS.forEach((_,i)=>$("hr"+i).style.display=m.includes(i)?"":"none");
+    $("copiar").style.display=m.length>1?"":"none";
+    $("hcap").textContent=m.length?"Horário de cada dia. Use o 2º turno só quando o profissional vem de manhã e à tarde no mesmo dia (ex.: 08:00 às 12:00 e 13:00 às 19:00).":"Marque os dias acima para informar o horário de cada um.";};
+  document.querySelectorAll("#dias input").forEach(i=>i.onchange=att);
+  window.attHorarios=att;
+}
 function refVis(){const n=document.querySelector("input[name=tipo]:checked").value==="0";
   $("refnum").style.display=$("refano").style.display=$("refcap").style.display=n?"none":"";}
 document.querySelectorAll("input[name=tipo]").forEach(r=>r.onchange=refVis);
 $("limpar").onclick=()=>{document.querySelectorAll("input[type=text],input[type=date],input[type=time]").forEach(i=>{if(!["unid","sig","cargo"].includes(i.id))i.value=""});
-  document.querySelectorAll("#dias input").forEach(i=>i.checked=false);$("saved").value="";init();$("msg").textContent=""};
+  document.querySelectorAll("#dias input").forEach(i=>i.checked=false);attHorarios();$("saved").value="";init();$("msg").textContent=""};
 $("gerar").onclick=gerar;
 function init(){
   const u=store.get("ultimo",null),ano=String(new Date().getFullYear());
@@ -266,7 +305,7 @@ function init(){
   if(u&&/^\d+$/.test(u.num))$("num").value=String(+u.num+1).padStart(2,"0");
   $("demissao").value=hojeISO();refVis();
 }
-listar();init();
+montarHorarios();listar();init();
 </script>
 </body>
 </html>
