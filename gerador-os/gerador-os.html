@@ -81,7 +81,7 @@ button.p:hover{background:var(--acx)}
  <div class="g">
   <label>Especialidade <input id="esp" type="text" list="esps" placeholder="Fonoaudiologia">
    <datalist id="esps"><option>Fonoaudiologia</option><option>Psicologia</option><option>Psicopedagogia</option><option>Terapia Ocupacional</option><option>Fisioterapia</option><option>Nutrição</option></datalist></label>
-  <label>Sala <input id="sala" type="text" placeholder="SALA 14"></label>
+  <label>Sala(s) <input id="sala" type="text" placeholder="14  ou  14, 15"></label>
   <label>Unidade <input id="unid" type="text" value="Affectus Saúde Integrada"></label>
   <label class="w2">Dia(s) da semana
    <div class="chk" id="dias">
@@ -203,6 +203,36 @@ function textoHorario(hor){
   const lista=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" e "+a[a.length-1];
   return grupos.map(g=>`${lista(g.dias)}: ${g.t}`).join("; ");
 }
+function textoSala(v){
+  const n=v.replace(/\bsalas?\b/gi,"").split(/\s*(?:,|;|\be\b|\/|&)\s*/i).map(x=>x.trim()).filter(Boolean);
+  if(n.length<2)return "SALA "+(n[0]||"");
+  return "SALAS "+n.slice(0,-1).join(", ")+" e "+n[n.length-1];
+}
+/* caixas de seleção no mesmo tamanho das da Remuneração (fonte MS Gothic) */
+function caixas(p){
+  const doc=p.ownerDocument;
+  for(const r of [...p.getElementsByTagNameNS(W,"r")]){
+    const t=r.getElementsByTagNameNS(W,"t")[0];if(!t)continue;
+    const partes=t.textContent.split(/([☐☒])/).filter(x=>x!=="");
+    if(!partes.some(x=>x==="☐"||x==="☒"))continue;
+    for(const parte of partes){
+      const c=r.cloneNode(true);c.getElementsByTagNameNS(W,"t")[0].textContent=parte;
+      c.getElementsByTagNameNS(W,"t")[0].setAttributeNS("http://www.w3.org/XML/1998/namespace","xml:space","preserve");
+      if(parte==="☐"||parte==="☒"){
+        let pr=[...c.childNodes].find(n=>n.localName==="rPr");
+        if(!pr){pr=doc.createElementNS(W,"w:rPr");c.insertBefore(pr,c.firstChild)}
+        pr.querySelectorAll?.("rFonts").forEach(x=>x.remove());
+        for(const f of [...pr.childNodes])if(f.localName==="rFonts")pr.removeChild(f);
+        const f=doc.createElementNS(W,"w:rFonts");
+        for(const a of ["ascii","eastAsia","hAnsi","cs"])f.setAttributeNS(W,"w:"+a,"MS Gothic");
+        f.setAttributeNS(W,"w:hint","eastAsia");
+        pr.insertBefore(f,pr.firstChild);
+      }
+      r.parentNode.insertBefore(c,r);
+    }
+    r.parentNode.removeChild(r);
+  }
+}
 function preencher(xml,d){
   const doc=new DOMParser().parseFromString(xml,"application/xml");
   const marca=(n,occ)=>["☐","☒",occ];
@@ -213,7 +243,7 @@ function preencher(xml,d){
     "[NOME] — [CONSELHO] nº [Nº/UF]":[["[NOME]",d.prof],["[CONSELHO]",d.conselho],["[Nº/UF]",d.nconselho]],
     "[ESPECIALIDADE]":[["[ESPECIALIDADE]",d.esp]],
     "[HH:MM] às [HH:MM]":[["[HH:MM] às [HH:MM]",textoHorario(d.hor)]],
-    "[SALA] — [UNIDADE]":[["[SALA]",d.sala],["[UNIDADE]",d.unid]],
+    "[SALA] — [UNIDADE]":[["[SALA]",textoSala(d.sala)],["[UNIDADE]",d.unid]],
     "de [DD/MM/AAAA] a [DD/MM/AAAA]":[["[DD/MM/AAAA]",d.vini,0],["[DD/MM/AAAA]",d.vfim,1]],
     "Prazo para resposta: até [DD/MM/AAAA].":[["[DD/MM/AAAA]",d.prazo]],
     "Aracaju/SE, [DD/MM/AAAA].":[["[DD/MM/AAAA]",d.demissao]],
@@ -234,7 +264,7 @@ function preencher(xml,d){
     else if(txt.startsWith("R$ [VALOR]")){ed=[["[VALOR]",d.valor]];if(d.por<=2)ed.push(["☐","☒",d.por])}
     else if(txt.startsWith("☐ turno mensal")){ed=[];if(d.por===3)ed.push(["☐","☒",0]);if(d.por===4)ed.push(["☐","☒",1])}
     else if(regras[txt]){ed=regras[txt]}
-    if(ed){if(ed.length)editParagraph(p,ed);usados.add(chave.slice(0,12))}
+    if(ed){if(ed.length)editParagraph(p,ed);if(txt.startsWith("☐ Nova")||txt.startsWith("☐ Seg"))caixas(p);usados.add(chave.slice(0,12))}
   }
   let out=new XMLSerializer().serializeToString(doc);
   if(/\[[A-ZÇÃÕ\/:Nº ]{2,}\]/.test(out.replace(/<[^>]+>/g,"")))throw new Error("Sobrou campo sem preencher no documento. Avise quem mantém o gerador.");
