@@ -6,10 +6,11 @@
 <title>Gerador de Ordem de Serviço</title>
 <style>
 :root{--bg:#f4f5f7;--card:#fff;--tx:#1f2328;--mut:#5f6872;--bd:#d5d9de;--ac:#0f6b5f;--acx:#0b574d;--bad:#b3261e}
-@media (prefers-color-scheme:dark){:root{--bg:#16191c;--card:#1f2327;--tx:#e8eaed;--mut:#9aa3ad;--bd:#363c43;--ac:#3fb8a6;--acx:#5cc9b8;--bad:#f2867f}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16191c;--card:#1f2327;--tx:#e8eaed;--mut:#9aa3ad;--bd:#363c43;--ac:#3fb8a6;--acx:#5cc9b8;--bad:#f2867f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#16191c;--card:#1f2327;--tx:#e8eaed;--mut:#9aa3ad;--bd:#363c43;--ac:#3fb8a6;--acx:#5cc9b8;--bad:#f2867f;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,Segoe UI,Arial,sans-serif}
-main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+body{background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,Segoe UI,Arial,sans-serif}
+main{max-width:760px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1{font-size:22px;margin:0 0 4px}
 .sub{color:var(--mut);margin:0 0 18px}
 fieldset{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin:0 0 16px;padding:14px 16px 16px}
@@ -29,7 +30,7 @@ input:focus,select:focus{outline:2px solid var(--ac);outline-offset:0}
 .mini{padding:5px 10px;font-size:13px;margin-top:8px}
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 button{font:inherit;padding:10px 18px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);cursor:pointer}
-button.p{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+button.p{background:var(--ac);border-color:var(--ac);color:var(--bg);font-weight:600}
 button.p:hover{background:var(--acx)}
 #msg{margin-top:10px;min-height:20px}.bad{color:var(--bad)}.ok{color:var(--ac)}
 </style>
@@ -38,14 +39,6 @@ button.p:hover{background:var(--acx)}
 <main>
 <h1>Gerador de Ordem de Serviço</h1>
 <p class="sub">Preencha só o que muda. O Word sai no modelo oficial, pronto para assinar no GOV.</p>
-
-<fieldset><legend>Profissional salvo</legend>
- <div class="g">
-  <label class="w2">Escolher um profissional já cadastrado
-   <select id="saved"><option value="">— novo profissional —</option></select></label>
- </div>
- <p class="cap">Depois de preencher a seção "Contratado", use <b>Salvar profissional</b> para não precisar digitar de novo. Fica salvo só neste navegador.</p>
-</fieldset>
 
 <fieldset><legend>1. Identificação</legend>
  <div class="g">
@@ -74,7 +67,6 @@ button.p:hover{background:var(--acx)}
   <label>Conselho <input id="conselho" type="text" placeholder="CREFONO, CRP, CREFITO…"></label>
   <label>Nº do conselho / UF <input id="nconselho" type="text" placeholder="4-15127"></label>
  </div>
- <div class="bar" style="margin-top:12px"><button type="button" id="salvar">Salvar profissional</button><button type="button" id="apagar">Apagar o selecionado</button></div>
 </fieldset>
 
 <fieldset><legend>2. Turno ofertado</legend>
@@ -112,7 +104,7 @@ button.p:hover{background:var(--acx)}
  <p class="cap">"ACEITO / NÃO ACEITO" fica em branco para o profissional marcar. A cidade e a data da assinatura seguem a data de emissão.</p>
 </fieldset>
 
-<div class="bar"><button class="p" id="gerar" type="button">Gerar Word</button><button type="button" id="limpar">Limpar formulário</button></div>
+<div class="bar"><button class="p" id="gerar" type="button">Gerar Word</button><button type="button" id="limpar">Limpar formulário</button><button type="button" id="relatorio">Baixar relatório das OS</button><span class="cap" id="conta"></span></div>
 <div id="msg" role="status"></div>
 </main>
 
@@ -135,6 +127,63 @@ const $=id=>document.getElementById(id);
 const W="http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
              set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const TIPOS=["Nova","Ampliação","Redução","Encerramento"];
+const POR=["sessão realizada","turno executado","turno semanal","turno mensal","hora trabalhada"];
+
+/* Registro das OS geradas: banco da página quando disponível; senão, só este navegador. */
+async function banco(){try{return (window.claude&&claude.use)?await claude.use("db"):null}catch(e){return null}}
+function registro(d){
+  const z=a=>a.map(x=>DIAS[x]).join(", ");
+  return {num:d.num,ano:d.ano,tipo:TIPOS[d.tipo],osRef:d.tipo===0?"":d.refn+"/"+d.refa,emissao:d.demissao,
+    contratado:d.razao,cnpj:d.cnpj,profissional:d.prof,conselho:d.conselho,nConselho:d.nconselho,especialidade:d.esp,
+    dias:z(d.dias),horario:textoHorario(d.hor),sala:textoSala(d.sala),unidade:d.unid,vigIni:d.vini,vigFim:d.vfim,
+    valor:d.valor,remuneracaoPor:POR[d.por],prazo:d.prazo,assinaAffectus:d.sig,geradoEm:new Date().toISOString()};
+}
+async function salvarOS(r){
+  const id=(r.ano+"-"+r.num).replace(/[^A-Za-z0-9_.~:@+-]/g,"-");
+  const db=await banco();
+  if(db){await db.collection("os").doc(id).set(r);return}
+  const l=store.get("os",{});l[id]=r;store.set("os",l);
+}
+async function listarOS(){
+  const db=await banco();
+  if(db){const q=await db.collection("os").get();return q.docs.map(x=>x.data())}
+  return Object.values(store.get("os",{}));
+}
+function ordenar(l){return l.slice().sort((a,b)=>(a.ano+"").localeCompare(b.ano+"")||(+a.num||0)-(+b.num||0)||(a.geradoEm||"").localeCompare(b.geradoEm||""))}
+async function atualizarContagem(){
+  try{const l=await listarOS();$("conta").textContent=l.length===1?"1 OS registrada":l.length+" OS registradas"}catch(e){$("conta").textContent=""}
+}
+function csv(l){
+  const cols=[["Nº","num"],["Ano","ano"],["Tipo","tipo"],["OS de referência","osRef"],["Data de emissão","emissao"],["Contratado","contratado"],["CNPJ","cnpj"],
+    ["Profissional","profissional"],["Conselho","conselho"],["Nº do conselho","nConselho"],["Especialidade","especialidade"],["Dias","dias"],["Horário","horario"],
+    ["Sala(s)","sala"],["Unidade","unidade"],["Vigência início","vigIni"],["Vigência fim","vigFim"],["Valor (R$)","valor"],["Remuneração por","remuneracaoPor"],
+    ["Prazo para resposta","prazo"],["Assina pela Affectus","assinaAffectus"]];
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  return "\ufeff"+[cols.map(c=>q(c[0])).join(";")].concat(ordenar(l).map(r=>cols.map(c=>q(r[c[1]])).join(";"))).join("\r\n");
+}
+async function relatorio(){
+  const msg=$("msg");msg.className="";msg.textContent="";
+  try{
+    const l=await listarOS();
+    if(!l.length){msg.className="bad";msg.textContent="Ainda não há OS registradas. Gere uma OS primeiro.";return}
+    const h=new Date(),z=n=>String(n).padStart(2,"0");
+    const nome="Relatório de Ordens de Serviço - "+z(h.getDate())+"-"+z(h.getMonth()+1)+"-"+h.getFullYear()+".csv";
+    await baixar(new Blob([csv(l)],{type:"text/csv;charset=utf-8"}),nome);
+    msg.className="ok";msg.textContent="Relatório baixado: "+nome+" ("+l.length+" OS). Abre no Excel.";
+  }catch(err){
+    if(err&&err.code==="declined"){msg.textContent="Download cancelado.";return}
+    msg.className="bad";msg.textContent="Não foi possível baixar o relatório: "+((err&&(err.message||err.code))||err);
+  }
+}
+/* Entrega do arquivo: confirmação da página publicada, ou download comum quando aberto como arquivo. */
+async function baixar(blob,nome){
+  let dl=null;
+  try{dl=(window.claude&&claude.use)?await claude.use("downloads"):null}catch(e){}
+  if(dl){await dl.save({filename:nome,data:blob});return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
 
 function br(iso){if(!iso)return "";const [y,m,d]=iso.split("-");return `${d}/${m}/${y}`}
 function pad2(n){n=String(n).trim();return /^\d$/.test(n)?"0"+n:n}
@@ -280,30 +329,16 @@ async function gerar(){
     const xml=await zip.file("word/document.xml").async("string");
     zip.file("word/document.xml",preencher(xml,d));
     const blob=await zip.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document",compression:"DEFLATE"});
-    const nome=`Ordem de Serviço ${d.num}-${d.ano} - ${d.prof} (${d.esp}).docx`.replace(/[\\\/:*?"<>|]/g,"-");
-    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
-    store.set("ultimo",{num:d.num,ano:d.ano});
-    msg.className="ok";msg.textContent="Pronto: "+nome+". Confira o documento antes de assinar.";
+    const nome=("Ordem de Serviço "+d.num+"-"+d.ano+" - "+d.prof+" ("+d.esp+").docx").replace(/[\\\/:*?"<>|]/g,"-");
+    try{await baixar(blob,nome)}
+    catch(err){msg.className=err&&err.code==="declined"?"":"bad";msg.textContent=err&&err.code==="declined"?"Download cancelado.":"Não foi possível salvar: "+((err&&(err.message||err.code))||err);return}
+    let aviso="";
+    try{await salvarOS(registro(d))}catch(err){aviso=" Atenção: não consegui registrar esta OS no relatório."}
+    atualizarContagem();
+    msg.className="ok";msg.textContent="Pronto: "+nome+". Confira o documento antes de assinar."+aviso;
   }catch(e){msg.className="bad";msg.textContent="Erro ao gerar: "+e.message}
 }
 
-/* profissionais salvos */
-const CAMPOS=["razao","cnpj","prof","conselho","nconselho","esp"];
-function listar(sel){
-  const lista=store.get("profissionais",[]);
-  $("saved").innerHTML='<option value="">— novo profissional —</option>'+lista.map((p,i)=>`<option value="${i}">${p.prof.replace(/</g,"&lt;")} — ${p.esp.replace(/</g,"&lt;")}</option>`).join("");
-  if(sel!=null)$("saved").value=String(sel);
-}
-$("saved").onchange=()=>{const p=store.get("profissionais",[])[$("saved").value];if(p)CAMPOS.forEach(c=>$(c).value=p[c]||"")};
-$("salvar").onclick=()=>{
-  const p={};CAMPOS.forEach(c=>p[c]=$(c).value.trim());
-  if(!p.prof||!p.esp){$("msg").className="bad";$("msg").textContent="Preencha ao menos o nome e a especialidade para salvar.";return}
-  const l=store.get("profissionais",[]);let i=l.findIndex(x=>x.prof===p.prof&&x.esp===p.esp);
-  if(i<0){l.push(p);i=l.length-1}else l[i]=p;
-  store.set("profissionais",l);listar(i);$("msg").className="ok";$("msg").textContent="Profissional salvo neste navegador.";
-};
-$("apagar").onclick=()=>{const i=$("saved").value;if(i==="")return;const l=store.get("profissionais",[]);l.splice(+i,1);store.set("profissionais",l);listar();};
 function montarHorarios(){
   const box=$("horarios");
   DIAS.forEach((n,i)=>{
@@ -327,15 +362,22 @@ function refVis(){const n=document.querySelector("input[name=tipo]:checked").val
   $("refnum").style.display=$("refano").style.display=$("refcap").style.display=n?"none":"";}
 document.querySelectorAll("input[name=tipo]").forEach(r=>r.onchange=refVis);
 $("limpar").onclick=()=>{document.querySelectorAll("input[type=text],input[type=date],input[type=time]").forEach(i=>{if(!["unid","sig","cargo"].includes(i.id))i.value=""});
-  document.querySelectorAll("#dias input").forEach(i=>i.checked=false);attHorarios();$("saved").value="";init();$("msg").textContent=""};
+  document.querySelectorAll("#dias input").forEach(i=>i.checked=false);attHorarios();init().then(sugerirNumero);$("msg").textContent=""};
 $("gerar").onclick=gerar;
-function init(){
-  const u=store.get("ultimo",null),ano=String(new Date().getFullYear());
-  $("ano").value=u?u.ano:ano;
-  if(u&&/^\d+$/.test(u.num))$("num").value=String(+u.num+1).padStart(2,"0");
+async function init(){
+  $("ano").value=String(new Date().getFullYear());
   $("demissao").value=hojeISO();refVis();
 }
-montarHorarios();listar();init();
+async function sugerirNumero(){
+  try{
+    const l=await listarOS(),ano=$("ano").value.trim();
+    const n=l.filter(r=>String(r.ano)===ano&&/^\d+$/.test(r.num)).map(r=>+r.num);
+    if(!$("num").value)$("num").value=String((n.length?Math.max(...n):0)+1).padStart(2,"0");
+  }catch(e){}
+}
+montarHorarios();init();sugerirNumero();atualizarContagem();
+$("relatorio").onclick=relatorio;
+$("ano").onchange=()=>{$("num").value="";sugerirNumero()};
 </script>
 </body>
 </html>
