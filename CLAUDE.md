@@ -20,3 +20,10 @@ Pacientes atendidos sem coleta de biometria (limite de 4 coletas por dia) ficam 
 - Não usar horários de outros profissionais da mesma especialidade (decisão de 12/10).
 - Márcia Carla (TO) só atende a partir de 20/10.
 - Não desfazer trabalho já feito pela equipe de reagendamento.
+
+## Instituto Affectus (projeto separado, em elaboração)
+Atendimento a crianças neurodivergentes, estrutura separada da clínica atual. O contexto completo, as decisões e os números estão em `projeto-neurodivergentes/CONTEXTO.md`.
+- Plano adotado em 22/10/2026: 300 crianças, 16 sessões de 30 min por mês, 1 visita de 2 h por semana.
+- Apresentação enviada ao chefe; aguardando o parecer. Depois da validação, a próxima etapa é o orçamento (turnos, custos por especialidade, remuneração por turno).
+- Artefato: https://claude.ai/artifact/F99g5HYE8i2J4cHdk5BE76 (privado). Apresentação: https://claude.ai/artifact/8cY11Hpabpw9N24Pc1svV9 (privada).
+- Em caso de dúvida, perguntar à gestora; não presumir.
