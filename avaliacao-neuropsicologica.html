@@ -1,0 +1,425 @@
+<title>Avaliação Neuropsicológica</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: cabeçalho com resumo, abas por etapa do processo, uma coluna de leitura com cartões só onde há ação */
+:root {
+  --bg: #f3f6f7;
+  --surface: #ffffff;
+  --ink: #12262b;
+  --muted: #5a6e74;
+  --line: #d6e0e3;
+  --accent: #0d6b72;
+  --accent-ink: #ffffff;
+  --accent-soft: #dff0f1;
+  --warn: #9a5b00;
+  --warn-soft: #fbeccd;
+  --ok: #1f7a46;
+  --ok-soft: #dcf1e4;
+  --bad: #a83232;
+  --bad-soft: #f8e0e0;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1a1d; --surface: #152428; --ink: #e4eef0; --muted: #93a9ae; --line: #264046;
+    --accent: #4fc0c8; --accent-ink: #072427; --accent-soft: #1a3a3e;
+    --warn: #f0b95a; --warn-soft: #3a2c10; --ok: #6fd39a; --ok-soft: #153523; --bad: #f08a8a; --bad-soft: #3d1a1a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1a1d; --surface: #152428; --ink: #e4eef0; --muted: #93a9ae; --line: #264046;
+  --accent: #4fc0c8; --accent-ink: #072427; --accent-soft: #1a3a3e;
+  --warn: #f0b95a; --warn-soft: #3a2c10; --ok: #6fd39a; --ok-soft: #153523; --bad: #f08a8a; --bad-soft: #3d1a1a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-block: 20px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(26px, 5vw, 36px); font-weight: 700; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 17px; font-weight: 500; }
+p { margin: 0; }
+.sub { color: var(--muted); margin-top: 6px; }
+.eyebrow { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stat b { display: block; font-family: var(--font-display); font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: 14px; }
+.tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+.tabs a { padding: 10px 14px; text-decoration: none; color: var(--muted); font-weight: 600; white-space: nowrap; border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.tabs a[aria-current="page"] { color: var(--accent); border-color: var(--accent); }
+.tabs a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.panel { display: grid; gap: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+.meta { color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.pos { font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--accent); min-width: 2ch; font-variant-numeric: tabular-nums; }
+.who { display: flex; gap: 14px; align-items: baseline; min-width: 0; }
+.who h3 { overflow-wrap: anywhere; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 13px; font-weight: 600; background: var(--accent-soft); color: var(--accent); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.ok { background: var(--ok-soft); color: var(--ok); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; }
+button { font: inherit; font-weight: 600; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 8px 14px; cursor: pointer; min-height: 40px; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+button.danger { color: var(--bad); }
+button.armed { background: var(--bad); color: #fff; border-color: var(--bad); }
+button:disabled { opacity: .5; cursor: not-allowed; }
+form, .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+label { display: grid; gap: 4px; font-size: 14px; font-weight: 600; min-width: 0; }
+input, select, textarea { font: inherit; font-weight: 400; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 40px; width: 100%; }
+.full { grid-column: 1 / -1; }
+.bar { height: 8px; background: var(--accent-soft); border-radius: 99px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 15px; vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+tr.total td { font-weight: 700; border-bottom: 0; }
+.cell { background: var(--accent-soft); color: var(--accent); border-radius: 6px; padding: 3px 8px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.empty { border: 1px dashed var(--line); border-radius: 10px; padding: 24px 16px; text-align: center; color: var(--muted); }
+.note { background: var(--warn-soft); color: var(--ink); border-radius: 10px; padding: 12px 14px; font-size: 15px; }
+ol.flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: s; }
+ol.flow li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
+ol.flow li::before { content: counter(s); font-family: var(--font-display); font-weight: 700; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; }
+ol.flow b { display: block; }
+ol.flow span { color: var(--muted); font-size: 15px; }
+ul.rules { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 20; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: no-preference) { .bar i { transition: width .25s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Affectus · Juscimária Bezerra de Souza (Jusci)</p>
+    <h1>Avaliação Neuropsicológica</h1>
+    <p class="sub">Quartas-feiras, das 08h às 12h, a partir de 18/11/2026. Quatro pacientes por manhã, até 10 sessões de 1 hora cada.</p>
+  </header>
+
+  <section class="stats" id="stats" aria-label="Resumo"></section>
+
+  <nav class="tabs" aria-label="Seções">
+    <a href="#fila" data-tab="fila">Fila de espera</a>
+    <a href="#avaliacao" data-tab="avaliacao">Em avaliação</a>
+    <a href="#agenda" data-tab="agenda">Agenda das quartas</a>
+    <a href="#valores" data-tab="valores">Valores e repasse</a>
+    <a href="#processo" data-tab="processo">Processo</a>
+  </nav>
+
+  <section id="addbox" class="card" hidden>
+    <h2>Incluir na fila</h2>
+    <form id="addform">
+      <label>Nome do paciente<input id="f-nome" required autocomplete="off"></label>
+      <label>Idade (a partir de 5 anos)<input id="f-idade" type="number" min="5" max="120" required></label>
+      <label>Responsável (se menor)<input id="f-resp" autocomplete="off"></label>
+      <label>Telefone<input id="f-tel" autocomplete="off"></label>
+      <label>Encaminhado por<input id="f-enc" placeholder="Escola, médico, indicação…" autocomplete="off"></label>
+      <label>Horário possível (quarta)
+        <select id="f-hor"><option value="qualquer">Qualquer horário da manhã</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option value="so-tarde">Só consegue à tarde</option></select>
+      </label>
+      <label class="full">Restrições (escola, trabalho, transporte)<input id="f-obs" autocomplete="off"></label>
+      <div class="full btns"><button class="primary" type="submit" id="f-ok">Incluir na fila</button></div>
+    </form>
+  </section>
+
+  <main id="view" class="panel" aria-live="polite"></main>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+const PACOTE = 1800, PROF = 1080, CLIN = 720, COM = 50;
+const PROF_L = PROF - COM / 2, CLIN_L = CLIN - COM / 2;
+const HORAS = ["08:00", "09:00", "10:00", "11:00"];
+const INICIO = "2026-11-18";
+const MAX_SESS = 10;
+const brl = n => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const pad = n => String(n).padStart(2, "0");
+const iso = d => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const br = s => s ? s.split("-").reverse().join("/") : "";
+const today = () => iso(new Date());
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+function addBusinessDays(s, n) { const d = parse(s); let k = 0; while (k < n) { d.setDate(d.getDate() + 1); if (d.getDay() % 6 !== 0) k++; } return iso(d); }
+function nextQuarta(from) { const d = parse(from > INICIO ? from : INICIO); while (d.getDay() !== 3) d.setDate(d.getDate() + 1); return iso(d); }
+const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+
+const STATUS = {
+  aguardando: ["Na fila", ""], convidado: ["Vaga ofertada", "warn"], confirmado: ["Pago, aguardando início", "ok"],
+  em_avaliacao: ["Em avaliação", "ok"], concluido: ["Concluído", ""], desistente: ["Desistente", "bad"]
+};
+
+let db = null, canWrite = true, docs = [], tab = "fila", pay = null, draft = {}, arm = null, ready = false, dbError = "";
+
+function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3200); }
+
+async function save(id, patch) {
+  if (!db) return toast("Entre com sua conta para salvar.");
+  try { await db.collection("pacientes").doc(id).update(patch); }
+  catch (e) { toast(e.code === "invalid_argument" ? "Sem permissão para alterar." : "Não foi possível salvar. Tente de novo."); }
+}
+
+/* ---------- cálculos ---------- */
+const ativos = () => docs.filter(p => p.status === "confirmado" || p.status === "em_avaliacao");
+const fila = () => docs.filter(p => p.status === "aguardando" || p.status === "convidado")
+  .sort((a, b) => (a.inscricao || "").localeCompare(b.inscricao || "") || (a.criadoEm || 0) - (b.criadoEm || 0));
+const ocupado = h => ativos().find(p => p.horario === h);
+const pagos = () => docs.filter(p => p.pago);
+
+function renderStats() {
+  const livres = HORAS.filter(h => !ocupado(h)).length;
+  const items = [
+    [livres + " de 4", "vagas livres na quarta"],
+    [fila().length, "na fila de espera"],
+    [ativos().length, "em avaliação ou com início marcado"],
+    [pagos().length, "pacotes pagos"]
+  ];
+  document.getElementById("stats").innerHTML = items.map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
+}
+
+/* ---------- fila ---------- */
+function viewFila() {
+  const f = fila(), livres = HORAS.filter(h => !ocupado(h)).length;
+  let h = `<div class="row"><h2>Fila de espera</h2><span class="meta">Ordem por data de inscrição</span></div>`;
+  if (!ready) return h + `<div class="empty">Carregando a fila…</div>`;
+  if (!db) return h + `<div class="empty">${esc(dbError || "Entre com sua conta para ver e editar a fila.")}</div>`;
+  if (f.length && livres > 0) {
+    const prox = f.find(p => p.status === "aguardando");
+    if (prox) h += `<div class="note">Há ${livres} vaga${livres > 1 ? "s" : ""} livre${livres > 1 ? "s" : ""} na quarta. Próximo da fila: <b>${esc(prox.nome)}</b>.</div>`;
+  }
+  if (!f.length) return h + `<div class="empty">Ninguém na fila ainda. Use o formulário acima para incluir o primeiro paciente.<br>A queixa não é registrada nesta etapa.</div>`;
+  h += f.map((p, i) => {
+    const espera = Math.max(0, daysBetween(p.inscricao || today(), today()));
+    const hp = p.horarioPref === "qualquer" ? "Qualquer manhã" : p.horarioPref === "so-tarde" ? "Só à tarde" : "Prefere " + p.horarioPref;
+    const aberto = pay === p.id;
+    const [lab, cls] = STATUS[p.status];
+    return `<article class="card">
+      <div class="row"><div class="who"><span class="pos">${i + 1}</span><h3>${esc(p.nome)}</h3><span>${esc(p.idade)} anos</span></div><span class="pill ${cls}">${lab}</span></div>
+      <div class="meta"><span>Responsável: ${esc(p.resp || "—")}</span><span>Tel.: ${esc(p.tel || "—")}</span><span>Encaminhado por: ${esc(p.enc || "—")}</span><span>${hp}</span><span>Inscrito em ${br(p.inscricao)} (${espera} dia${espera === 1 ? "" : "s"})</span></div>
+      ${p.obs ? `<p>${esc(p.obs)}</p>` : ""}
+      ${p.horarioPref === "so-tarde" ? `<p class="meta">Só consegue à tarde: ajuda a medir a demanda para abrir turno à tarde.</p>` : ""}
+      ${aberto ? payForm(p) : actionsFila(p)}
+    </article>`;
+  }).join("");
+  return h;
+}
+function actionsFila(p) {
+  const b = [];
+  if (p.status === "aguardando") b.push(`<button class="primary" data-act="convidar" data-id="${p.id}" ${canWrite ? "" : "disabled"}>Ofertar vaga</button>`);
+  if (p.status === "convidado") {
+    b.push(`<button class="primary" data-act="abrirpag" data-id="${p.id}">Registrar pagamento integral</button>`);
+    b.push(`<button data-act="voltar" data-id="${p.id}">Voltar para a fila</button>`);
+  }
+  b.push(armBtn("saiu", p.id, "Saiu da fila", "Confirmar saída"));
+  return `<div class="btns">${b.join("")}</div>`;
+}
+function payForm(p) {
+  const d = Object.assign({ forma: "avista", horario: "", inicio: nextQuarta(today()) }, draft);
+  const opts = HORAS.map(h => { const o = ocupado(h); return `<option value="${h}" ${o ? "disabled" : ""} ${d.horario === h ? "selected" : ""}>${h}${o ? " (ocupado)" : ""}</option>`; }).join("");
+  return `<div class="grid">
+    <label>Forma de pagamento<select data-draft="forma"><option value="avista" ${d.forma === "avista" ? "selected" : ""}>À vista</option><option value="cartao" ${d.forma === "cartao" ? "selected" : ""}>Cartão (com acréscimo da maquineta)</option></select></label>
+    <label>Horário fixo na quarta<select data-draft="horario"><option value="">Escolher…</option>${opts}</select></label>
+    <label>Primeira sessão (quarta)<input type="date" data-draft="inicio" value="${d.inicio}" min="${INICIO}"></label>
+  </div>
+  <p class="meta">Valor do pacote: ${brl(PACOTE)}, pago integralmente antes do início. Sem reembolso em caso de desistência.</p>
+  <div class="btns"><button class="primary" data-act="confirmarpag" data-id="${p.id}">Confirmar pagamento</button><button data-act="fecharpag">Cancelar</button></div>`;
+}
+function armBtn(act, id, label, confirmLabel) {
+  const on = arm === act + id;
+  return `<button class="${on ? "armed" : "danger"}" data-act="${act}" data-id="${id}">${on ? confirmLabel : label}</button>`;
+}
+
+/* ---------- em avaliação ---------- */
+function viewAval() {
+  let h = `<div class="row"><h2>Em avaliação</h2><span class="meta">Laudo em até 15 dias úteis após a última sessão</span></div>`;
+  if (!ready) return h + `<div class="empty">Carregando…</div>`;
+  if (!db) return h + `<div class="empty">${esc(dbError || "Entre com sua conta para ver os pacientes.")}</div>`;
+  const at = ativos().sort((a, b) => (a.horario || "").localeCompare(b.horario || ""));
+  const enc = docs.filter(p => p.status === "concluido" || p.status === "desistente");
+  if (!at.length && !enc.length) return h + `<div class="empty">Nenhum paciente com pagamento confirmado. Quando o pagamento for registrado na fila, o paciente aparece aqui com horário fixo e controle de sessões.</div>`;
+  h += at.map(cardAval).join("");
+  if (enc.length) {
+    h += `<h2>Encerrados</h2>` + enc.map(p => `<article class="card"><div class="row"><div class="who"><h3>${esc(p.nome)}</h3><span>${esc(p.idade)} anos</span></div><span class="pill ${STATUS[p.status][1]}">${STATUS[p.status][0]}</span></div>
+      <div class="meta"><span>${p.sessoes || 0} de ${MAX_SESS} sessões</span>${p.pago ? `<span>Pacote pago, sem reembolso</span>` : ""}${p.laudoEm ? `<span>Laudo entregue em ${br(p.laudoEm)}</span>` : ""}</div>${finBtns(p)}</article>`).join("");
+  }
+  return h;
+}
+function finBtns(p) {
+  if (!p.pago) return "";
+  return `<div class="btns"><button data-act="tgl" data-f="comissaoPaga" data-id="${p.id}" ${canWrite ? "" : "disabled"}>${p.comissaoPaga ? "✔ Comissão da Nívea paga" : "Marcar comissão da Nívea como paga"}</button>
+    <button data-act="tgl" data-f="repassePago" data-id="${p.id}" ${canWrite ? "" : "disabled"}>${p.repassePago ? "✔ Repasse da Jusci pago" : "Marcar repasse da Jusci como pago"}</button></div>`;
+}
+function cardAval(p) {
+  const s = p.sessoes || 0, pct = Math.round(s / MAX_SESS * 100), [lab, cls] = STATUS[p.status];
+  const prazo = p.fimTestagem ? addBusinessDays(p.fimTestagem, 15) : null;
+  const atraso = prazo && !p.laudoEm && prazo < today();
+  return `<article class="card">
+    <div class="row"><div class="who"><span class="pos">${p.horario || "—"}</span><h3>${esc(p.nome)}</h3><span>${esc(p.idade)} anos</span></div><span class="pill ${cls}">${lab}</span></div>
+    <div class="meta"><span>Responsável: ${esc(p.resp || "—")}</span><span>Tel.: ${esc(p.tel || "—")}</span><span>Início: ${br(p.inicio)}</span><span>Pago ${p.forma === "cartao" ? "no cartão" : "à vista"} em ${br(p.pagoEm)}</span></div>
+    <div><div class="row"><b>${s} de ${MAX_SESS} sessões</b><span class="meta">${p.faltas || 0} falta${(p.faltas || 0) === 1 ? "" : "s"} reagendada${(p.faltas || 0) === 1 ? "" : "s"}</span></div><div class="bar" role="img" aria-label="${pct}% das sessões"><i style="width:${pct}%"></i></div></div>
+    <div class="btns">
+      <button class="primary" data-act="sessao" data-d="1" data-id="${p.id}" ${canWrite && s < MAX_SESS && !p.fimTestagem ? "" : "disabled"}>Sessão realizada</button>
+      <button data-act="sessao" data-d="-1" data-id="${p.id}" ${canWrite && s > 0 && !p.fimTestagem ? "" : "disabled"}>Desfazer</button>
+      <button data-act="falta" data-id="${p.id}" ${canWrite ? "" : "disabled"}>Falta reagendada</button>
+      ${!p.fimTestagem ? `<button data-act="fimtest" data-id="${p.id}" ${canWrite && s > 0 ? "" : "disabled"}>Encerrar testagem</button>` : ""}
+    </div>
+    ${prazo ? `<p class="${atraso ? "pill bad" : "pill warn"}" style="justify-self:start">Testagem encerrada em ${br(p.fimTestagem)}. Laudo até ${br(prazo)}${atraso ? " (prazo vencido)" : ""}</p>
+      <div class="btns"><button class="primary" data-act="laudo" data-id="${p.id}" ${canWrite ? "" : "disabled"}>Devolutiva e laudo entregues</button></div>` : ""}
+    ${finBtns(p)}
+    <div class="btns">${armBtn("desistiu", p.id, "Registrar desistência", "Confirmar desistência (sem reembolso)")}</div>
+  </article>`;
+}
+
+/* ---------- agenda ---------- */
+function viewAgenda() {
+  const qs = Array.from({ length: 12 }, (_, i) => addDays(nextQuarta(today()), i * 7));
+  const at = ativos();
+  let h = `<div class="row"><h2>Agenda das quartas</h2><span class="meta">Cada paciente mantém o mesmo horário toda semana</span></div>`;
+  if (!ready || !db) return h + `<div class="empty">${ready ? esc(dbError || "Entre com sua conta para ver a agenda.") : "Carregando…"}</div>`;
+  h += `<div class="card scroll"><table><thead><tr><th>Horário</th>${qs.map(q => `<th>${br(q).slice(0, 5)}</th>`).join("")}</tr></thead><tbody>` +
+    HORAS.map(hr => `<tr><td><b>${hr}</b></td>${qs.map(q => {
+      const p = at.find(x => x.horario === hr && x.inicio && x.inicio <= q && q <= addDays(x.inicio, 7 * (MAX_SESS - 1)));
+      return `<td>${p ? `<span class="cell">${esc(p.nome.split(" ")[0])}</span>` : ""}</td>`;
+    }).join("")}</tr>`).join("") + `</tbody></table></div>
+    <p class="meta">A coluna mostra as próximas 12 quartas a partir de hoje (ou de 18/11, o que vier depois). O horário fica reservado por até 10 semanas a partir da primeira sessão. Quando a avaliação termina antes, o horário é liberado ao encerrar. Feriados não estão descontados: use o reagendamento.</p>`;
+  const livres = HORAS.filter(x => !ocupado(x));
+  h += `<div class="card"><h3>Horários sem paciente fixo</h3><p>${livres.length ? livres.join(", ") : "Nenhum. A quarta está completa."}</p></div>`;
+  return h;
+}
+
+/* ---------- valores ---------- */
+function viewValores() {
+  const pg = pagos(), n = pg.length;
+  const aPagar = pg.filter(p => !p.comissaoPaga).length;
+  const rp = pg.filter(p => !p.repassePago).length;
+  let h = `<h2>Valores e repasse</h2>
+  <div class="card scroll"><table><thead><tr><th>Item</th><th class="num">Por pacote</th></tr></thead><tbody>
+    <tr><td>Valor do pacote (até 10 sessões, particular)</td><td class="num">${brl(PACOTE)}</td></tr>
+    <tr><td>Jusci, 60%</td><td class="num">${brl(PROF)}</td></tr>
+    <tr><td>Clínica, 40%</td><td class="num">${brl(CLIN)}</td></tr>
+    <tr><td>Comissão da Nívea (R$ 25,00 de cada parte)</td><td class="num">${brl(COM)}</td></tr>
+    <tr class="total"><td>Jusci recebe (60% menos R$ 25,00)</td><td class="num">${brl(PROF_L)}</td></tr>
+    <tr class="total"><td>Clínica fica (40% menos R$ 25,00)</td><td class="num">${brl(CLIN_L)}</td></tr>
+  </tbody></table></div>
+  <div class="note">Acréscimo da maquineta no cartão: a definir. O valor do pacote é o mesmo; o acréscimo é cobrado do paciente e não entra na divisão.</div>
+  <div class="card"><h3>Pagamento e política</h3><ul class="rules">
+    <li>Pagamento integral, à vista ou no cartão com acréscimo da maquineta, antes da primeira sessão.</li>
+    <li>Em caso de desistência, não há reembolso. Isso entra no contrato.</li>
+    <li>A comissão da Nívea é de ${brl(COM)} por pacote fechado, ou seja, pago. Ela entra no controle assim que o pagamento é registrado.</li>
+    <li>Materiais e testes são da Jusci, sem custo de sala para este cálculo.</li>
+  </ul></div>`;
+  if (ready && db) {
+    h += `<div class="card scroll"><h3>Acumulado dos pacotes pagos</h3><table><thead><tr><th>Quem</th><th class="num">Total</th><th class="num">Ainda a pagar</th></tr></thead><tbody>
+      <tr><td>Pacotes pagos</td><td class="num">${n} (${brl(n * PACOTE)})</td><td class="num"></td></tr>
+      <tr><td>Jusci</td><td class="num">${brl(n * PROF_L)}</td><td class="num">${brl(rp * PROF_L)}</td></tr>
+      <tr><td>Clínica</td><td class="num">${brl(n * CLIN_L)}</td><td class="num"></td></tr>
+      <tr><td>Nívea (comissão)</td><td class="num">${brl(n * COM)}</td><td class="num">${brl(aPagar * COM)}</td></tr>
+    </tbody></table></div>`;
+  }
+  return h;
+}
+
+/* ---------- processo ---------- */
+function viewProcesso() {
+  const passos = [
+    ["Divulgação e inclusão na fila", "Nívea registra o interessado (nome, idade, responsável, telefone, quem encaminhou, horário possível). A queixa não é pedida agora. Divulgação em outubro."],
+    ["Oferta de vaga", "Quando há horário livre na quarta, chama o primeiro da fila que consiga aquele horário. Se não responder em 48 horas, passa ao próximo."],
+    ["Pagamento integral e contrato", "Pacote de " + brl(PACOTE) + " pago antes de começar, à vista ou no cartão com acréscimo. Contrato e termo de consentimento assinados. A vaga só é garantida com o pagamento."],
+    ["Anamnese", "Primeira sessão, com responsável (menores) ou paciente (adultos). Coleta de laudos, boletins e exames anteriores."],
+    ["Testagem", "Sessões semanais de 1 hora, sempre na quarta e no mesmo horário. Até 10 sessões no total, contando anamnese e devolutiva."],
+    ["Faltas", "Falta não tira o paciente do processo. A sessão é reagendada pelo processo de reagendamento da clínica."],
+    ["Correção, análise e laudo", "Jusci conclui o laudo em até 15 dias úteis após a última sessão de testagem."],
+    ["Devolutiva e encaminhamentos", "Entrega e explicação do laudo, com orientações. Encaminhamento às terapias da clínica, quando indicado."]
+  ];
+  return `<h2>Processo</h2>
+    <div class="card"><ol class="flow">${passos.map(([t, d]) => `<li><div><b>${t}</b><span>${d}</span></div></li>`).join("")}</ol></div>
+    <div class="card"><h3>Regras da operação</h3><ul class="rules">
+      <li>Público: a partir de 5 anos, sem limite de idade.</li>
+      <li>Uma manhã por semana, às quartas, das 08h às 12h, com 4 horários de 1 hora. As avaliações começam em 18/11/2026.</li>
+      <li>Ritmo semanal. Cada paciente fica com o mesmo horário até terminar.</li>
+      <li>Se a fila crescer, a lista mostra quem só consegue à tarde, para decidir sobre abrir turno à tarde.</li>
+      <li>Atendimento particular, sem convênio.</li>
+    </ul></div>
+    <div class="card"><h3>Pendências</h3><ul class="rules"><li>Percentual do acréscimo da maquineta.</li><li>Texto final do contrato e do termo de consentimento.</li><li>Início da contagem dos 15 dias úteis: aqui conta a partir da última sessão de testagem.</li></ul></div>`;
+}
+
+/* ---------- render ---------- */
+function render() {
+  document.querySelectorAll(".tabs a").forEach(a => { if (a.dataset.tab === tab) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  document.getElementById("addbox").hidden = !(tab === "fila" && db && canWrite);
+  renderStats();
+  const v = { fila: viewFila, avaliacao: viewAval, agenda: viewAgenda, valores: viewValores, processo: viewProcesso }[tab] || viewFila;
+  document.getElementById("view").innerHTML = v();
+}
+function setTab() { const h = location.hash.slice(1); tab = ["fila", "avaliacao", "agenda", "valores", "processo"].includes(h) ? h : "fila"; pay = null; draft = {}; arm = null; render(); }
+window.addEventListener("hashchange", setTab);
+
+/* ---------- ações ---------- */
+document.getElementById("view").addEventListener("input", e => { const k = e.target.dataset.draft; if (k) draft[k] = e.target.value; });
+document.getElementById("view").addEventListener("change", e => { const k = e.target.dataset.draft; if (k) draft[k] = e.target.value; });
+document.getElementById("view").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const act = b.dataset.act, id = b.dataset.id, p = docs.find(x => x.id === id);
+  if (act === "abrirpag") { pay = id; draft = {}; return render(); }
+  if (act === "fecharpag") { pay = null; draft = {}; return render(); }
+  if (["saiu", "desistiu"].includes(act)) {
+    if (arm !== act + id) { arm = act + id; return render(); }
+    arm = null;
+    await save(id, act === "saiu" ? { status: "desistente", saiuEm: today() } : { status: "desistente", desistiuEm: today() });
+    return toast(act === "saiu" ? "Removido da fila." : "Desistência registrada. O horário foi liberado.");
+  }
+  if (!p) return;
+  if (act === "convidar") await save(id, { status: "convidado", convidadoEm: today() });
+  else if (act === "voltar") await save(id, { status: "aguardando" });
+  else if (act === "confirmarpag") {
+    const d = Object.assign({ forma: "avista", horario: "", inicio: nextQuarta(today()) }, draft);
+    if (!d.horario) return toast("Escolha o horário fixo da quarta.");
+    if (ocupado(d.horario)) return toast("Esse horário já está ocupado.");
+    if (parse(d.inicio).getDay() !== 3) return toast("A primeira sessão precisa cair numa quarta-feira.");
+    if (d.inicio < INICIO) return toast("As avaliações começam em 18/11/2026.");
+    await save(id, { status: "confirmado", pago: true, pagoEm: today(), forma: d.forma, horario: d.horario, inicio: d.inicio, valor: PACOTE, comissaoPaga: false, repassePago: false, sessoes: 0, faltas: 0 });
+    pay = null; draft = {}; toast("Pagamento registrado. Horário " + d.horario + " reservado.");
+  }
+  else if (act === "sessao") { const n = Math.max(0, Math.min(MAX_SESS, (p.sessoes || 0) + Number(b.dataset.d))); await save(id, { sessoes: n, status: n > 0 ? "em_avaliacao" : "confirmado" }); }
+  else if (act === "falta") { await save(id, { faltas: (p.faltas || 0) + 1 }); toast("Falta registrada. Reagende pelo processo de reposição."); }
+  else if (act === "fimtest") await save(id, { fimTestagem: today() });
+  else if (act === "laudo") { await save(id, { status: "concluido", laudoEm: today() }); toast("Avaliação concluída. Horário liberado."); }
+  else if (act === "tgl") await save(id, { [b.dataset.f]: !p[b.dataset.f] });
+});
+
+document.getElementById("addform").addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!db) return;
+  const v = id => document.getElementById(id).value.trim();
+  const idade = Number(v("f-idade"));
+  if (!v("f-nome") || idade < 5) return toast("Informe o nome e uma idade a partir de 5 anos.");
+  const btn = document.getElementById("f-ok"); btn.disabled = true;
+  try {
+    await db.collection("pacientes").add({ nome: v("f-nome"), idade, resp: v("f-resp"), tel: v("f-tel"), enc: v("f-enc"), horarioPref: v("f-hor"), obs: v("f-obs"), status: "aguardando", inscricao: today(), criadoEm: Date.now() });
+    e.target.reset(); toast("Incluído na fila.");
+  } catch (err) { toast(err.code === "invalid_argument" ? "Sem permissão para incluir." : "Não foi possível incluir. Tente de novo."); }
+  btn.disabled = false;
+});
+
+/* ---------- arranque ---------- */
+setTab();
+(async () => {
+  try {
+    const user = await window.claude.use("user");
+    if (user) { const c = user.can("data.write"); canWrite = c !== false; }
+    db = await window.claude.use("db");
+    if (!db) { ready = true; dbError = "Entre com sua conta do Claude para ver e editar a fila."; return render(); }
+    db.collection("pacientes").onSnapshot(snap => {
+      docs = snap.docs.map(d => Object.assign({ id: d.id }, d.data()));
+      ready = true; render();
+    }, err => { ready = true; dbError = err.code === "revoked" ? "O acesso a estes dados foi retirado." : "Não foi possível carregar os dados."; render(); });
+  } catch (e) { ready = true; dbError = "Não foi possível carregar os dados."; render(); }
+})();
+</script>
