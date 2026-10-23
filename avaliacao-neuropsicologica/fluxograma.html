@@ -1,0 +1,188 @@
+<title>Fluxo da Avaliação Neuropsicológica</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Mulish:wght@400;600;700&display=swap">
+<style>
+/* Layout: fluxo vertical em coluna central, desvios e regras nas laterais; legenda dos responsáveis no topo */
+:root {
+  --bg: #f1f6f6;
+  --surface: #ffffff;
+  --ink: #1e3f4a;
+  --muted: #5d777c;
+  --line: #9db8bb;
+  --teal: #3f8f86;
+  --steel: #528db0;
+  --gold: #b88a3e;
+  --gold-soft: #f5ead2;
+  --teal-soft: #dcefec;
+  --steel-soft: #dde9f2;
+  --ink-soft: #e3eaec;
+  --warn: #a14b3b;
+  --warn-soft: #f6e3de;
+  --shadow: rgba(30, 63, 74, .22);
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Mulish", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1c1f; --surface: #172a2f; --ink: #e5f0f1; --muted: #9db6b9; --line: #3d5d62;
+    --teal: #6cc3b8; --steel: #7db4d6; --gold: #e0b866; --gold-soft: #3a3019; --teal-soft: #17393a; --steel-soft: #1a3347; --ink-soft: #20363b;
+    --warn: #f0a595; --warn-soft: #3d221d; --shadow: rgba(0, 0, 0, .5);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1c1f; --surface: #172a2f; --ink: #e5f0f1; --muted: #9db6b9; --line: #3d5d62;
+  --teal: #6cc3b8; --steel: #7db4d6; --gold: #e0b866; --gold-soft: #3a3019; --teal-soft: #17393a; --steel-soft: #1a3347; --ink-soft: #20363b;
+  --warn: #f0a595; --warn-soft: #3d221d; --shadow: rgba(0, 0, 0, .5);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-block: 28px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 1500px; margin: 0 auto; display: grid; gap: 22px; }
+header { display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; justify-content: space-between; }
+h1 { font-family: var(--font-display); font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; font-weight: 700; text-wrap: balance; }
+.sub { color: var(--muted); margin: 6px 0 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.legend i { width: 14px; height: 14px; border-radius: 4px; }
+.scroll { overflow-x: auto; border-radius: 14px; }
+svg { display: block; width: 100%; min-width: 760px; height: auto; background: var(--surface); border-radius: 14px; box-shadow: 0 24px 50px -24px var(--shadow); }
+svg text { font-family: var(--font-body); fill: var(--ink); }
+.t-title { font-weight: 700; font-size: 20px; }
+.t-body { font-size: 15.5px; fill: var(--muted); }
+.t-tag { font-weight: 700; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; }
+.t-note { font-size: 15px; }
+.t-edge { font-size: 14px; font-weight: 700; fill: var(--ink); }
+.box { fill: var(--surface); stroke-width: 2; }
+.edge { fill: none; stroke: var(--line); stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.edge.dash { stroke-dasharray: 7 6; }
+.edge.loop { stroke: var(--warn); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Fluxo da Avaliação Neuropsicológica</h1>
+      <p class="sub">Da lista de espera ao laudo · quartas-feiras, 08h às 12h · início em 18/11/2026</p>
+    </div>
+    <div class="legend" aria-label="Responsáveis">
+      <span><i style="background:var(--gold)"></i>Paciente ou responsável</span>
+      <span><i style="background:var(--steel)"></i>Agendamento (Nívea)</span>
+      <span><i style="background:var(--teal)"></i>Jusci</span>
+      <span><i style="background:var(--ink)"></i>Clínica</span>
+    </div>
+  </header>
+  <div class="scroll"><svg id="flow" role="img" aria-label="Fluxograma da avaliação neuropsicológica"></svg></div>
+</div>
+
+<script>
+/* ---- dados do fluxo ---- */
+const W = 1560, CX = 780, BW = 540;               // largura total, centro da coluna, largura das caixas
+const TAGS = {
+  paciente: ["Paciente ou responsável", "var(--gold)", "var(--gold-soft)"],
+  nivea: ["Agendamento · Nívea", "var(--steel)", "var(--steel-soft)"],
+  jusci: ["Jusci", "var(--teal)", "var(--teal-soft)"],
+  clinica: ["Clínica", "var(--ink)", "var(--ink-soft)"],
+  dois: ["Paciente e clínica", "var(--gold)", "var(--gold-soft)"]
+};
+const N = [
+  { id: "ini", type: "pill", text: "Interessado procura a clínica", tag: "paciente" },
+  { id: "fila", title: "Registro na fila de espera", body: "Nome, idade (a partir de 5 anos), responsável, telefone e horário possível. A queixa não é registrada nesta etapa.", tag: "nivea" },
+  { id: "d1", type: "dec", text: "Há horário livre na quarta, das 08h às 11h?" },
+  { id: "oferta", title: "Oferta da vaga", body: "Chama o primeiro da fila. Resposta em até 48 horas; sem resposta, a vaga passa ao próximo.", tag: "nivea" },
+  { id: "pag", title: "Contrato, termo de consentimento e pagamento", body: "Pagamento integral de R$ 1.800,00 antes da primeira sessão, à vista ou no cartão com acréscimo da maquineta.", tag: "dois" },
+  { id: "d2", type: "dec", text: "Pagamento integral confirmado?" },
+  { id: "reg", title: "Registro e reserva do horário fixo", body: "Horário fixo semanal na quarta. Comissão de R$ 50,00 do agendamento, R$ 25,00 de cada parte.", tag: "nivea" },
+  { id: "anam", title: "Anamnese (sessão 1)", body: "Com o responsável, no caso de menores, ou com o paciente adulto. Coleta de laudos, boletins e exames anteriores.", tag: "jusci" },
+  { id: "test", title: "Testagem semanal", body: "Quartas-feiras, 1 hora, sempre no mesmo horário. No máximo 10 sessões no total, contando anamnese e devolutiva.", tag: "jusci" },
+  { id: "d3", type: "dec", text: "O paciente faltou?" },
+  { id: "laudo", title: "Correção, análise e laudo", body: "Prazo de até 15 dias úteis após a última sessão de testagem.", tag: "jusci" },
+  { id: "devo", title: "Devolutiva e entrega do laudo", body: "Explicação do laudo e orientações ao paciente ou ao responsável.", tag: "jusci" },
+  { id: "fim", title: "Encaminhamentos e encerramento", body: "Indica terapias da clínica, quando houver. O horário é liberado, o próximo da fila é chamado e a Jusci recebe o repasse (60% menos R$ 25,00).", tag: "clinica" },
+  { id: "end", type: "pill", text: "Avaliação concluída", tag: "clinica", end: true }
+];
+const NOTES = [
+  { id: "n1", side: "r", at: "d1", text: "Não: permanece na fila, por ordem de inscrição. Quem só consegue à tarde fica sinalizado, para avaliar a abertura de turno extra.", from: "d1", fromSide: "r" },
+  { id: "n2", side: "r", at: "d2", text: "Não: a vaga não é garantida. Ela volta a ser oferecida ao próximo da fila.", from: "d2", fromSide: "r" },
+  { id: "n3", side: "r", at: "d3", text: "Sim: a sessão é reagendada pelo processo de reagendamento, sem custo, e o paciente volta à testagem.", from: "d3", fromSide: "r", loopTo: "test" },
+  { id: "n4", side: "l", at: "test", text: "Desistência em qualquer etapa: sem reembolso ao paciente. A Jusci recebe pelas sessões realizadas (1/10 do valor líquido por sessão) e o horário é liberado.", from: "test", fromSide: "l", dash: true }
+];
+
+/* ---- layout ---- */
+const NS = "http://www.w3.org/2000/svg", svg = document.getElementById("flow");
+const el = (n, a = {}, p = svg) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+function wrap(t, max) { const w = t.split(" "), L = []; let c = ""; w.forEach(x => { if ((c + " " + x).trim().length > max) { L.push(c); c = x; } else c = (c + " " + x).trim(); }); if (c) L.push(c); return L; }
+const GAP = 58, TOP = 40;
+let y = TOP; const P = {};
+N.forEach(n => {
+  if (n.type === "dec") { n.h = 128; n.w = BW; n.lines = wrap(n.text, 32); }
+  else if (n.type === "pill") { n.h = 64; n.w = 400; }
+  else { n.lines = wrap(n.body, 62); n.h = 62 + 22 * n.lines.length + 20; n.w = BW; }
+  n.x = CX - n.w / 2; n.y = y; y += n.h + GAP; P[n.id] = n;
+});
+const H = y - GAP + TOP;
+svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+const defs = el("defs");
+const mk = el("marker", { id: "ah", viewBox: "0 0 10 10", refX: "8", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" }, defs);
+el("path", { d: "M0 0 L10 5 L0 10 z", fill: "var(--line)" }, mk);
+const mk2 = el("marker", { id: "ahw", viewBox: "0 0 10 10", refX: "8", refY: "5", markerWidth: "8", markerHeight: "8", orient: "auto-start-reverse" }, defs);
+el("path", { d: "M0 0 L10 5 L0 10 z", fill: "var(--warn)" }, mk2);
+const sh = el("filter", { id: "sh", x: "-20%", y: "-20%", width: "140%", height: "150%" }, defs);
+el("feDropShadow", { dx: "0", dy: "10", stdDeviation: "9", "flood-color": "#1e3f4a", "flood-opacity": ".18" }, sh);
+
+const anchor = (n, s) => s === "t" ? [CX, n.y] : s === "b" ? [CX, n.y + n.h] : s === "r" ? [n.x + n.w, n.y + n.h / 2] : [n.x, n.y + n.h / 2];
+const edge = (pts, cls = "", mark = "ah") => el("polyline", { points: pts.map(p => p.join(",")).join(" "), class: "edge " + cls, "marker-end": `url(#${mark})` });
+const label = (x, yy, t, anchorTxt = "middle") => { const g = el("text", { x, y: yy, class: "t-edge", "text-anchor": anchorTxt }); g.textContent = t; };
+
+/* arestas verticais */
+for (let i = 0; i < N.length - 1; i++) {
+  const a = N[i], b = N[i + 1];
+  edge([anchor(a, "b"), anchor(b, "t")]);
+  if (a.type === "dec") label(CX + 14, a.y + a.h + 30, "Sim", "start");
+  if (a.id === "d3") { /* "Não" desce para o laudo */ const t = svg.lastChild; }
+}
+label(CX + 14, P.d3.y + P.d3.h + 30, "Não", "start");
+/* o "Sim" do d3 é o desvio lateral; ajusta os rótulos do d3 */
+[...svg.querySelectorAll("text.t-edge")].forEach(t => { if (t.textContent === "Sim" && +t.getAttribute("y") === P.d3.y + P.d3.h + 30) t.remove(); });
+
+/* caixas */
+N.forEach(n => {
+  const g = el("g");
+  if (n.type === "dec") {
+    const cx = CX, cy = n.y + n.h / 2;
+    el("polygon", { points: `${cx},${n.y} ${n.x + n.w},${cy} ${cx},${n.y + n.h} ${n.x},${cy}`, class: "box", stroke: "var(--ink)", filter: "url(#sh)" }, g);
+    const ly = cy - (n.lines.length - 1) * 11 + 6;
+    n.lines.forEach((l, i) => { const t = el("text", { x: cx, y: ly + i * 22, class: "t-title", "text-anchor": "middle", style: "font-size:19px" }, g); t.textContent = l; });
+  } else if (n.type === "pill") {
+    const tg = TAGS[n.tag];
+    el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: 32, class: "box", fill: n.end ? tg[2] : "var(--surface)", stroke: tg[1], filter: "url(#sh)" }, g);
+    const t = el("text", { x: CX, y: n.y + n.h / 2 + 7, class: "t-title", "text-anchor": "middle" }, g); t.textContent = n.text;
+    if (!n.end) { const s = el("text", { x: CX, y: n.y - 10, class: "t-tag", "text-anchor": "middle", fill: tg[1], style: "fill:" + tg[1] }, g); s.textContent = tg[0]; }
+  } else {
+    const tg = TAGS[n.tag];
+    el("rect", { x: n.x, y: n.y, width: n.w, height: n.h, rx: 14, class: "box", stroke: tg[1], filter: "url(#sh)" }, g);
+    el("rect", { x: n.x, y: n.y, width: 9, height: n.h, rx: 4, fill: tg[1] }, g);
+    const s = el("text", { x: n.x + 28, y: n.y + 26, class: "t-tag", style: "fill:" + tg[1] }, g); s.textContent = tg[0];
+    const t = el("text", { x: n.x + 28, y: n.y + 54, class: "t-title" }, g); t.textContent = n.title;
+    n.lines.forEach((l, i) => { const b = el("text", { x: n.x + 28, y: n.y + 80 + i * 22, class: "t-body" }, g); b.textContent = l; });
+  }
+});
+
+/* notas laterais */
+NOTES.forEach(nt => {
+  const a = P[nt.at], w = 380, lines = wrap(nt.text, 40), h = 28 + lines.length * 22;
+  const x = nt.side === "r" ? CX + BW / 2 + 70 : CX - BW / 2 - 70 - w;
+  const yy = a.y + a.h / 2 - h / 2;
+  const warn = !!nt.loopTo, g = el("g");
+  el("rect", { x, y: yy, width: w, height: h, rx: 12, fill: warn ? "var(--warn-soft)" : "var(--ink-soft)", stroke: warn ? "var(--warn)" : "var(--line)", "stroke-width": 1.6, filter: "url(#sh)" }, g);
+  lines.forEach((l, i) => { const t = el("text", { x: x + 18, y: yy + 30 + i * 22, class: "t-note" }, g); t.textContent = l; });
+  const from = anchor(a, nt.fromSide), to = [nt.side === "r" ? x : x + w, a.y + a.h / 2];
+  const e = edge([from, to], nt.dash ? "dash" : warn ? "loop" : "");
+  if (nt.id !== "n4") label((from[0] + to[0]) / 2, from[1] - 12, nt.id === "n3" ? "Sim" : "Não");
+  if (nt.loopTo) {
+    const b = P[nt.loopTo], ex = x + w / 2;
+    edge([[ex, yy], [ex, b.y + b.h / 2], [b.x + b.w, b.y + b.h / 2]], "loop", "ahw");
+  }
+});
+</script>
