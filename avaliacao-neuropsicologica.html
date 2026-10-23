@@ -119,7 +119,7 @@ ul.rules { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
       <label>Nome do paciente<input id="f-nome" required autocomplete="off"></label>
       <label>Idade (a partir de 5 anos)<input id="f-idade" type="number" min="5" max="120" required></label>
       <label>Responsável (se menor)<input id="f-resp" autocomplete="off"></label>
-      <label>Telefone<input id="f-tel" autocomplete="off"></label>
+      <label>Telefone (celular)<input id="f-tel" type="tel" inputmode="numeric" maxlength="14" placeholder="(79)99999-9999" autocomplete="off"></label>
       <label>Encaminhado por<input id="f-enc" placeholder="Escola, médico, indicação…" autocomplete="off"></label>
       <label>Horário possível (quarta)
         <select id="f-hor"><option value="qualquer">Qualquer horário da manhã</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option value="so-tarde">Só consegue à tarde</option></select>
@@ -138,6 +138,7 @@ const PACOTE = 1800, PROF = 1080, CLIN = 720, COM = 50;
 const PROF_L = PROF - COM / 2, CLIN_L = CLIN - COM / 2;
 const HORAS = ["08:00", "09:00", "10:00", "11:00"];
 const INICIO = "2026-11-18";
+const FECHADO = ["2026-12-30"]; // quartas em que a clínica está fechada
 const MAX_SESS = 10;
 const brl = n => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -148,7 +149,7 @@ const br = s => s ? s.split("-").reverse().join("/") : "";
 const today = () => iso(new Date());
 const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
 function addBusinessDays(s, n) { const d = parse(s); let k = 0; while (k < n) { d.setDate(d.getDate() + 1); if (d.getDay() % 6 !== 0) k++; } return iso(d); }
-function nextQuarta(from) { const d = parse(from > INICIO ? from : INICIO); while (d.getDay() !== 3) d.setDate(d.getDate() + 1); return iso(d); }
+function nextQuarta(from) { const d = parse(from > INICIO ? from : INICIO); while (d.getDay() !== 3 || FECHADO.includes(iso(d))) d.setDate(d.getDate() + 1); return iso(d); }
 const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
 
 const STATUS = {
@@ -279,7 +280,7 @@ function cardAval(p) {
 
 /* ---------- agenda ---------- */
 function viewAgenda() {
-  const qs = Array.from({ length: 12 }, (_, i) => addDays(nextQuarta(today()), i * 7));
+  const qs = []; for (let q = nextQuarta(today()); qs.length < 12; q = nextQuarta(addDays(q, 1))) qs.push(q);
   const at = ativos();
   let h = `<div class="row"><h2>Agenda das quartas</h2><span class="meta">Cada paciente mantém o mesmo horário toda semana</span></div>`;
   if (!ready || !db) return h + `<div class="empty">${ready ? esc(dbError || "Entre com sua conta para ver a agenda.") : "Carregando…"}</div>`;
@@ -384,6 +385,7 @@ document.getElementById("view").addEventListener("click", async e => {
     if (ocupado(d.horario)) return toast("Esse horário já está ocupado.");
     if (parse(d.inicio).getDay() !== 3) return toast("A primeira sessão precisa cair numa quarta-feira.");
     if (d.inicio < INICIO) return toast("As avaliações começam em 18/11/2026.");
+    if (FECHADO.includes(d.inicio)) return toast("A clínica está fechada nesse dia.");
     await save(id, { status: "confirmado", pago: true, pagoEm: today(), forma: d.forma, horario: d.horario, inicio: d.inicio, valor: PACOTE, comissaoPaga: false, repassePago: false, sessoes: 0, faltas: 0 });
     pay = null; draft = {}; toast("Pagamento registrado. Horário " + d.horario + " reservado.");
   }
@@ -400,12 +402,18 @@ document.getElementById("addform").addEventListener("submit", async e => {
   const v = id => document.getElementById(id).value.trim();
   const idade = Number(v("f-idade"));
   if (!v("f-nome") || idade < 5) return toast("Informe o nome e uma idade a partir de 5 anos.");
+  if (v("f-tel") && v("f-tel").replace(/\D/g, "").length !== 11) return toast("Informe o celular completo: (XX)9XXXX-XXXX.");
   const btn = document.getElementById("f-ok"); btn.disabled = true;
   try {
     await db.collection("pacientes").add({ nome: v("f-nome"), idade, resp: v("f-resp"), tel: v("f-tel"), enc: v("f-enc"), horarioPref: v("f-hor"), obs: v("f-obs"), status: "aguardando", inscricao: today(), criadoEm: Date.now() });
     e.target.reset(); toast("Incluído na fila.");
   } catch (err) { toast(err.code === "invalid_argument" ? "Sem permissão para incluir." : "Não foi possível incluir. Tente de novo."); }
   btn.disabled = false;
+});
+
+document.getElementById("f-tel").addEventListener("input", e => {
+  const d = e.target.value.replace(/\D/g, "").slice(0, 11);
+  e.target.value = d.length > 7 ? `(${d.slice(0, 2)})${d.slice(2, 7)}-${d.slice(7)}` : d.length > 2 ? `(${d.slice(0, 2)})${d.slice(2)}` : d ? `(${d}` : "";
 });
 
 /* ---------- arranque ---------- */
