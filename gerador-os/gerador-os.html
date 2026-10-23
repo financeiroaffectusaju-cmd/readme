@@ -222,7 +222,7 @@ function dados(){
   const v=id=>$(id).value.trim();
   const tipo=+document.querySelector("input[name=tipo]:checked").value;
   const dias=[...document.querySelectorAll("#dias input:checked")].map(i=>+i.value);
-  const hor=dias.map(i=>{const g=k=>$("h"+i+k).value;return {dia:i,t:g("t"),p:[[g("a"),g("b")],[g("c"),g("d")]]}});
+  const hor=dias.map(i=>{const g=k=>$("h"+i+k).value;return {dia:i,p:[[g("a"),g("b")],[g("c"),g("d")]]}});
   return {num:pad2(v("num")),ano:v("ano"),dcontrato:br(v("dcontrato")),demissao:br(v("demissao")),tipo,
     refn:pad2(v("refn")),refa:v("refa"),razao:v("razao"),cnpj:v("cnpj"),prof:v("prof"),conselho:v("conselho"),
     nconselho:v("nconselho"),esp:v("esp"),sala:v("sala"),unid:v("unid"),dias,hor,
@@ -239,7 +239,6 @@ function faltando(d){
   if(!d.dias.length)m.push("Dia(s) da semana");
   for(const h of d.hor){
     const n=DIAS[h.dia];
-    if(h.t!=="h")continue;
     if(!h.p[0][0]||!h.p[0][1])m.push("Horário de "+n);
     for(const [a,b] of h.p){if((a&&!b)||(!a&&b))m.push("Horário incompleto em "+n);else if(a&&b&&b<=a)m.push("Horário final antes do inicial em "+n)}
   }
@@ -249,7 +248,7 @@ function faltando(d){
 
 const DIAS=["Seg","Ter","Qua","Qui","Sex","Sáb"];
 function textoHorario(hor){
-  const faixa=h=>h.t==="m"?"turno da manhã":h.t==="t"?"turno da tarde":h.t==="mt"?"turnos da manhã e da tarde":h.p.filter(([a,b])=>a&&b).map(([a,b])=>`${a} às ${b}`).join(" e ");
+  const faixa=h=>h.p.filter(([a,b])=>a&&b).map(([a,b])=>`${a} às ${b}`).join(" e ");
   const grupos=[];
   for(const h of hor){const t=faixa(h);const g=grupos.find(x=>x.t===t);if(g)g.dias.push(DIAS[h.dia]);else grupos.push({t,dias:[DIAS[h.dia]]})}
   if(grupos.length===1)return grupos[0].t.charAt(0).toUpperCase()+grupos[0].t.slice(1);
@@ -347,19 +346,23 @@ function montarHorarios(){
   const box=$("horarios");
   DIAS.forEach((n,i)=>{
     const r=document.createElement("div");r.className="hr";r.id="hr"+i;r.style.display="none";
-    r.innerHTML=`<b>${n}</b><div class="hb"><select id="h${i}t" aria-label="Turno de ${n}"><option value="h">Informar os horários</option><option value="m">Turno da manhã</option><option value="t">Turno da tarde</option><option value="mt">Manhã e tarde</option></select><div class="ti" id="ti${i}">`+[["a","Início"],["b","Fim"],["c","Início (2º turno)"],["d","Fim (2º turno)"]].map(([k,t])=>`<label>${t}<input id="h${i}${k}" type="time"></label>`).join("")+"</div></div>";
-    r.querySelector("select").onchange=()=>{$("ti"+i).style.display=$("h"+i+"t").value==="h"?"":"none"};
+    r.innerHTML=`<b>${n}</b><div class="hb"><select id="h${i}t" aria-label="Turno de ${n}"><option value="">Preencher horário padrão…</option><option value="m">Manhã: 08:00 às 12:00</option><option value="t">Tarde: 13:00 às 19:00</option><option value="mt">Manhã e tarde: 08:00 às 12:00 e 13:00 às 19:00</option></select><div class="ti" id="ti${i}">`+[["a","Início"],["b","Fim"],["c","Início (2º turno)"],["d","Fim (2º turno)"]].map(([k,t])=>`<label>${t}<input id="h${i}${k}" type="time"></label>`).join("")+"</div></div>";
+    r.querySelector("select").onchange=e=>{
+      const P={m:["08:00","12:00","",""],t:["13:00","19:00","",""],mt:["08:00","12:00","13:00","19:00"]}[e.target.value];
+      if(P)["a","b","c","d"].forEach((k,j)=>$("h"+i+k).value=P[j]);
+      e.target.value="";
+    };
     box.appendChild(r);
   });
   const b=document.createElement("button");b.type="button";b.className="mini";b.id="copiar";b.style.display="none";
   b.textContent="Copiar o horário do primeiro dia para os demais";
   b.onclick=()=>{const m=[...document.querySelectorAll("#dias input:checked")].map(x=>+x.value);if(m.length<2)return;
-    m.slice(1).forEach(i=>{["a","b","c","d","t"].forEach(k=>$("h"+i+k).value=$("h"+m[0]+k).value);$("ti"+i).style.display=$("h"+i+"t").value==="h"?"":"none"})};
+    m.slice(1).forEach(i=>["a","b","c","d"].forEach(k=>$("h"+i+k).value=$("h"+m[0]+k).value))};
   box.appendChild(b);
   const att=()=>{const m=[...document.querySelectorAll("#dias input:checked")].map(x=>+x.value);
     DIAS.forEach((_,i)=>$("hr"+i).style.display=m.includes(i)?"":"none");
     $("copiar").style.display=m.length>1?"":"none";
-    $("hcap").textContent=m.length?"Para cada dia, escolha só o turno (manhã, tarde ou os dois) ou informe os horários. Use o 2º turno quando o profissional vem de manhã e à tarde no mesmo dia (ex.: 08:00 às 12:00 e 13:00 às 19:00).":"Marque os dias acima para informar o horário de cada um.";};
+    $("hcap").textContent=m.length?"Informe o horário de cada dia, ou use o horário padrão (manhã, tarde ou os dois) e ajuste se precisar. O 2º turno serve para quem vem de manhã e à tarde no mesmo dia.":"Marque os dias acima para informar o horário de cada um.";};
   document.querySelectorAll("#dias input").forEach(i=>i.onchange=att);
   window.attHorarios=att;
 }
