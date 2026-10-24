@@ -12,7 +12,7 @@ Base para atualizar a aba "Médicos" da planilha de custos (Custo_Terapias_Insti
 - Valor da hora (já informado): neuropediatra e psiquiatra infantil R$ 750,00; pediatra R$ 500,00.
 - Base: 300 crianças.
 
-## Cenário A: os 3 médicos atendem as 300 crianças (900 consultas por fase)
+## Cenário A (anterior): os 3 médicos atendem as 300 crianças (900 consultas por fase)
 | | Sem 10% | Com 10% |
 |---|---|---|
 | Consultas no ciclo de 12 meses | 1.800 | 1.980 |
@@ -37,10 +37,27 @@ Base para atualizar a aba "Médicos" da planilha de custos (Custo_Terapias_Insti
 | Horas de atendimento por mês | 30 h | 33 h |
 | Horas no ciclo | 360 h | 396 h |
 
+## Pediatra: 100% das crianças (300), mesmo fluxo do neuropediatra
+| | Sem 10% | Com 10% |
+|---|---|---|
+| Primeiras consultas + retornos | 300 + 300 = 600 | 330 + 330 = 660 |
+| Consultas por mês | 50 | 55 |
+| Horas de atendimento por mês | 37,5 h | 41,25 h |
+| Horas no ciclo | 450 h | 495 h |
+
+Consulta de 45 min. Valor da hora já informado: R$ 500,00 (custo só depois de definidos os dias).
+
+## Resumo atual dos 3 médicos (neuropediatra 300, psiquiatra infantil 240, pediatra 300)
+| | Sem 10% | Com 10% |
+|---|---|---|
+| Consultas no ciclo de 12 meses | 1.680 | 1.848 |
+| Consultas por mês | 140 | 154 |
+| Horas de atendimento por mês | 105 h | 115,5 h |
+| Horas no ciclo | 1.260 h | 1.386 h |
+
 ## Se tudo (1ª consulta e reavaliação) tivesse de caber em 6 meses
-A carga dobra: neuropediatra 100 consultas por mês (75 h; 110 e 82,5 h com a margem); psiquiatra infantil 80 consultas por mês (60 h; 88 e 66 h com a margem).
+A carga dobra: neuropediatra e pediatra 100 consultas por mês cada (75 h; 110 e 82,5 h com a margem); psiquiatra infantil 80 consultas por mês (60 h; 88 e 66 h com a margem).
 
 ## Pendências
 - Dias na clínica de cada médico (e, a partir deles, horas disponíveis e custo): a negociar.
-- Pediatra: fluxo e percentual de crianças ainda não definidos.
 - Atualizar a aba "Médicos" e o "Resumo Geral" da planilha com estes números.
