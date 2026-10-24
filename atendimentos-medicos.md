@@ -61,3 +61,11 @@ A carga dobra: neuropediatra e pediatra 100 consultas por mês cada (75 h; 110 e
 ## Pendências
 - Dias na clínica de cada médico (e, a partir deles, horas disponíveis e custo): a negociar.
 - Atualizar a aba "Médicos" e o "Resumo Geral" da planilha com estes números.
+
+## Pagamento por consulta (definido em 24/10/2026)
+- Neuropediatra e psiquiatra infantil: R$ 750,00 por consulta (consultas e retornos).
+- Pediatra: R$ 500,00 por consulta + retorno (lido como valor por paciente; confirmar com a gestora).
+- Custo por ano, com 10%: neuropediatra 660 × R$ 750,00 = R$ 495.000,00; psiquiatra infantil 528 × R$ 750,00 = R$ 396.000,00; pediatra 330 × R$ 500,00 = R$ 165.000,00; total R$ 1.056.000,00 (R$ 88.000,00 por mês).
+- Sem 10%: R$ 450.000,00 + R$ 360.000,00 + R$ 150.000,00 = R$ 960.000,00 (R$ 80.000,00 por mês).
+- Se o pediatra cobrar R$ 500,00 por consulta e por retorno: 660 × R$ 500,00 = R$ 330.000,00 e total com 10% de R$ 1.221.000,00.
+- Planilha: Custo_Terapias_Instituto_Affectus_13.xlsx (aba Médicos, chave B32 para o pediatra).
