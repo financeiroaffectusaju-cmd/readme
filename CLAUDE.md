@@ -20,3 +20,12 @@ Pacientes atendidos sem coleta de biometria (limite de 4 coletas por dia) ficam 
 - Não usar horários de outros profissionais da mesma especialidade (decisão de 12/10).
 - Márcia Carla (TO) só atende a partir de 20/10.
 - Não desfazer trabalho já feito pela equipe de reagendamento.
+
+## Checagem obrigatória antes de gravar reposições (decisão de 26/10/2026)
+Erros já ocorridos: Fono sugerida com Daiane (não é a profissional do paciente e não tem horário de reagendamento) e turno extra às 12:30 (horário de almoço). Antes de gravar qualquer sessão em `sessoes`, conferir:
+- O profissional da reposição só pode ser: o de origem; ou um horário exclusivo de reagendamento (Márcia Carla e Igor na TO às terças, Maria José na Psicologia); ou Jusci (Psicologia, manhãs); ou Malu (Fono, tardes, menos terça); ou Sheila (PM/Psicopedagogia, quintas). Nunca o horário livre de outro profissional da mesma especialidade (nem na "Profissional diferente (horário livre de X)").
+- Em dia útil não existe horário de 12:00 às 13:00: turno extra só em 08:00–12:00 ou 13:00–19:00 (sábado 08:00–13:00), sem invadir o almoço.
+- Horário livre da agenda oficial só conta se não houver nome de paciente na data; células "REAGENDAMENTO ... dd/mm" estão ocupadas só naquela data.
+- Depois de gravar, rodar a auditoria (nenhuma sessão aberta pode cair fora dessas regras) e só mexer em sessões ainda `pendente`, sem atualização da equipe.
+- Divisão das novas faltas entre a equipe: por paciente; quem já cuida do paciente continua. Proporção usada em 26/10: Lara 33%, Mylena 30%, Marcela 23%, Renata 14%.
+
