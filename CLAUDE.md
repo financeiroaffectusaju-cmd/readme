@@ -28,4 +28,4 @@ Erros já ocorridos: Fono sugerida com Daiane (não é a profissional do pacient
 - Horário livre da agenda oficial só conta se não houver nome de paciente na data; células "REAGENDAMENTO ... dd/mm" estão ocupadas só naquela data.
 - Depois de gravar, rodar a auditoria (nenhuma sessão aberta pode cair fora dessas regras) e só mexer em sessões ainda `pendente`, sem atualização da equipe.
 - Divisão das novas faltas entre a equipe: por paciente; quem já cuida do paciente continua. Proporção usada em 26/10: Lara 33%, Mylena 30%, Marcela 23%, Renata 14%.
-
+- Faltas de outubro não são reagendadas para novembro (decisão de 26/10). O que não couber nas vagas até 31/10 (profissional de origem, reagendamento, Jusci, Malu, Sheila) sai de `sessoes` e vai para a coleção `semvaga`, que aparece na aba "Sem vaga" do painel, com a primeira vaga possível depois de 31/10 como informação. Não criar turno extra automaticamente para essas sessões.
