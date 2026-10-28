@@ -1,9 +1,11 @@
 ---
 name: comparativo-guias
-description: Fluxo da Affectus para um paciente. Busca no sistema (affectusaju.com/sistema) as sessões e as evoluções do período, lê as guias Hapvida escaneadas e gera um PDF com o comparativo "data assinada na guia x atendimento no sistema" mais as evoluções por profissional. Usar quando a gestora pedir "mesmo processo" para um paciente, mandar guias escaneadas, ou pedir comparativo de guias e evoluções.
+description: Fluxo da Affectus para um paciente. Busca no sistema (affectusaju.com/sistema) as sessões e as evoluções do período, lê as guias Hapvida escaneadas e gera um PDF com o comparativo "data assinada na guia x atendimento no sistema" mais as evoluções por profissional. Chamado pela gestora de "Comparativo-guias" (ex.: "Comparativo-guias NOME DO PACIENTE" com as guias anexadas). Usar também quando ela pedir "mesmo processo" para um paciente, mandar guias escaneadas, ou pedir comparativo de guias e evoluções.
 ---
 
-# Comparativo de guias x atendimentos + evoluções (por paciente)
+# Comparativo-guias: guias x atendimentos + evoluções (por paciente)
+
+Nome do processo para a gestora: **Comparativo-guias**. Ao ser chamado, pedir o que faltar (paciente, guias, período) e seguir os passos abaixo.
 
 Processo definido com a gestora em 27-28/10/2026. Um PDF por paciente. Só leitura: nunca salvar, concluir nem alterar nada no sistema.
 

@@ -15,7 +15,7 @@ Ao ser pedida a gerar esse documento, montar um por paciente a partir da coleç�
 Pacientes atendidos sem coleta de biometria (limite de 4 coletas por dia) ficam na aba Biometria, com histórico por paciente. O relatório do mês é anexado às guias.
 
 ## Comparativo de guias x atendimentos + evoluções (por paciente)
-Quando a gestora pedir "o mesmo processo" para um paciente, ou mandar guias Hapvida escaneadas, seguir o roteiro em `.claude/skills/comparativo-guias/SKILL.md` (scripts na mesma pasta). Resultado: um PDF por paciente com as datas assinadas nas guias conferidas com as sessões do sistema (inconsistências) e as evoluções por profissional. Só leitura no sistema; senha nunca vai para arquivo nem repositório; dados de pacientes não são versionados.
+A gestora chama esse processo de **Comparativo-guias** (também vale `/comparativo-guias`). Quando ela escrever "Comparativo-guias" (em geral com o nome do paciente e as guias anexadas), pedir "o mesmo processo" para um paciente, ou mandar guias Hapvida escaneadas, seguir o roteiro em `.claude/skills/comparativo-guias/SKILL.md` (scripts na mesma pasta). Resultado: um PDF por paciente com as datas assinadas nas guias conferidas com as sessões do sistema (inconsistências) e as evoluções por profissional. Só leitura no sistema; senha nunca vai para arquivo nem repositório; dados de pacientes não são versionados.
 
 ## Regras já decididas
 - Reposição: mesmo profissional, no dia em que o paciente já vem, horário mais próximo; sem vaga, horários exclusivos de reagendamento, Jusci (manhãs, Psicologia) e Malu (tardes, Fono, menos terça); demais casos, turno extra.
