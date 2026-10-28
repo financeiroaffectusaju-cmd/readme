@@ -1,4 +1,4 @@
-import json,collections,sys
+import json,collections,re,sys
 from xml.sax.saxutils import escape
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer, PageBreak
@@ -11,7 +11,7 @@ sess=json.load(open(S+sessf)); guias=json.load(open(S+guif))
 fixn={'RIVâNIA DOS REIS':'RIVÂNIA DOS REIS'}
 for r in sess:
     r['profissional']=fixn.get(r['profissional'],r['profissional']).strip()
-    r['evolucao']=(r['evolucao'] or '').replace('\xa0',' ').strip(); r['usada']=False
+    r['evolucao']=re.sub(r'\n\s*\n+','\n',re.sub(r'[ \t]+',' ',(r['evolucao'] or '').replace('\xa0',' '))).strip(); r['usada']=False
 sess.sort(key=lambda r:(r['data'][6:]+r['data'][3:5]+r['data'][:2],r['ini']))
 OK={'CONCLUIDO','FORÇA TAREFA'}
 guias.sort(key=lambda g:(g['emissao'][6:]+g['emissao'][3:5]+g['emissao'][:2],g['guia']))
