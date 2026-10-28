@@ -34,7 +34,8 @@ for g in guias:
             msg='Não há atendimento desta especialidade nesta data no sistema' if not same else f"Todas as sessões desta data já foram contadas ({len(same)}); assinada {cnt[d]}x na guia"
             inc+=1;rows.append((i,d,'-','Sem atendimento','INC',(nota+'. ' if nota else '')+msg))
     res.append((g,rows))
-orf=[r for r in sess if not r['usada'] and r['status'] in OK]
+espg={g['esp'] for g in guias}
+orf=[r for r in sess if not r['usada'] and r['status'] in OK and r['especialidade'] in espg]
 print('inconsistências:',inc,'| sem data em guia:',len(orf))
 for g,rows in res: print(g['guia'],g['esp'],sum(1 for r in rows if r[4]=='OK'),'/',len(rows),'assinadas; autorizadas',g['qtd'])
 ss=getSampleStyleSheet()

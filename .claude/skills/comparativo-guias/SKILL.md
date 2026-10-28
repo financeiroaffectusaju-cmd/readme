@@ -47,6 +47,15 @@ NODE_PATH=$(npm root -g) node scrape_sessoes.js
 - Roda em alguns minutos; em segundo plano com `nohup` e acompanhar o log (`FIM` no final). Saída: `out/TAG_sessoes_evol.json`.
 - Nunca clicar em OK, Chamar na TV, Salvar e sair ou Concluir atendimento.
 
+
+### Conferir se não faltou profissional (obrigatório)
+A lista "Selecione o profissional" só traz profissionais ativos. Quem saiu da clínica não aparece e suas sessões escapam da varredura (caso real: Terapia Ocupacional da Clarissa em jan-mar, com a Juliana Profeta). Por isso, sempre cruzar com o **histórico do paciente**, que traz todas as sessões de todos os profissionais, com data, horário, situação, nº da guia e evolução:
+1. Descobrir o id do paciente (célula `td.id` na busca do modal "Consultar Paciente").
+2. `curl -c cj.txt -d "login=$LOGIN" -d "senha=$SENHA" https://affectusaju.com/sistema/php/login.php` e depois `python3 -I historico_paciente.py ID_DO_PACIENTE TAG` (usa o cookie `cj.txt` do diretório atual; grava `out/TAG_hist_ents.json` já filtrado em jan-mai; ajustar as datas no script se o período for outro).
+3. Comparar a contagem do histórico com a da varredura. Se o histórico tiver mais sessões, completar com elas: buscar a evolução de cada id novo no prontuário (`painel.php?pag=prontuario&id_atendimento=ID`, `#exame_fisico`) e usar o conjunto completo no Passo 3. A evolução do histórico vem com entidades HTML e `|` no lugar das quebras; prefira o texto do prontuário.
+4. Especialidades sem guia (ex.: Socialização) entram nas evoluções, mas não na lista "sem data assinada".
+Anelly (81) e Jasminy (57) foram conferidas: a varredura já estava completa.
+
 ## Passo 3: comparar e gerar o PDF
 ```bash
 WORKDIR=. python3 -I build_comparativo.py "NOME COMPLETO" out/TAG_sessoes_evol.json guias.json Paciente_comparativo_guias_evolucoes.pdf "janeiro a maio de 2026"
