@@ -22,7 +22,7 @@ Pacientes atendidos sem coleta de biometria (limite de 4 coletas por dia) ficam 
 - Não desfazer trabalho já feito pela equipe de reagendamento.
 
 ## Instituto Affectus: agenda e custo dos médicos (decisão de 07/11/2026)
-Estrutura separada da clínica (planilha `Custo_Terapias_Instituto_Affectus_16_v25.xlsx`, aba Médicos). Negociado com os médicos de cada especialidade (atualizado em 07/11/2026):
+Estrutura separada da clínica (planilha `Custo_Terapias_Instituto_Affectus_16_v26.xlsx`, aba Médicos). Negociado com os médicos de cada especialidade (atualizado em 07/11/2026):
 - Neuropediatra: 2 dias de atendimento por mês. Psiquiatra infantil: 1 dia por mês. Pediatra: 1 dia por mês.
 - Horário: das 8h às 12h e das 13h às 17h (8 h por dia).
 - Consulta de 45 min (neuropediatra e psiquiatra infantil) e de 30 min (pediatra). O valor do pediatra (R$ 500 por paciente) já inclui a consulta de retorno.
@@ -34,4 +34,4 @@ Capacidade de atendimento (consultas):
 - Total: 46 por mês e 552 por ano, cerca de 30% da demanda de 1.848 consultas por ano (300 crianças, consulta + retorno em 6 meses, margem de 10%; psiquiatra 80% das crianças).
 
 Custo (só das consultas que cabem na agenda): neuropediatra R$ 180.000 (R$ 750 por consulta), psiquiatra R$ 90.000 (R$ 750 por consulta), pediatra R$ 48.000 (R$ 500 por paciente). Total R$ 318.000 por ano (R$ 26.500 por mês), antes R$ 1.056.000 pela demanda.
-Total do Instituto (v25, sem mudar a supervisão do AT): custo anual de operação R$ 6.657.530; primeiro ano com investimento e carência de 3 meses do aluguel R$ 8.023.950. Para atender toda a demanda médica seriam necessários cerca de 5,5 dias por mês por médico.
+Total do Instituto (v26): custo anual de operação R$ 7.990.585 (inclui Projeto AT com 300 estagiários e 30 supervisores, R$ 3.701.970; INSS patronal de 27,8% na equipe CLT; aluguel de R$ 20.000 por mês; custos recorrentes de R$ 304.029); primeiro ano com investimento de R$ 1.426.420 e carência de 3 meses do aluguel: R$ 9.357.005. Para atender toda a demanda médica seriam necessários cerca de 5,5 dias por mês por médico.
